@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build:vercel",
+  "framework": "nextjs",
+  "env": {
+    "SKIP_TYPE_CHECK": "true",
+    "DISABLE_ESLINT_PLUGIN": "true",
+    "NODE_OPTIONS": "--max_old_space_size=4096"
+  }
+}

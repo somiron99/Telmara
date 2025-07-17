@@ -89,8 +89,20 @@ const nextConfig = {
         fs: false,
         net: false,
         tls: false,
+        crypto: false,
+        stream: false,
+        util: false,
+        buffer: false,
+        assert: false,
       }
     }
+
+    // Add global polyfills
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        'global.self': 'globalThis',
+      })
+    )
 
     // Optimize bundle size
     config.optimization.splitChunks = {
@@ -108,7 +120,7 @@ const nextConfig = {
   },
   
   // Output configuration for better performance
-  output: 'standalone',
+  // output: 'standalone', // Disabled for Vercel deployment
   
   // Enable static optimization
   trailingSlash: false,
