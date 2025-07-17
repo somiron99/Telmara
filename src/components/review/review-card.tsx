@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Heart, MessageCircle, Share2, Star, Eye, ArrowRight } from 'lucide-react'
+import { Heart, MessageCircle, Share2, Star } from 'lucide-react'
 import { formatRelativeTime } from '@/lib/utils'
 import { ReviewWithCompany, CommentWithAuthor } from '@/lib/types'
 import CommentSection from './comment-section'
@@ -138,18 +138,17 @@ export default function ReviewCard({ review, onLike, onComment, onShare, onAddCo
           </p>
         </div>
 
-        {/* View Full Review Button */}
-        <div className="mb-6">
-          <Button
-            variant="outline"
-            onClick={() => router.push(`/reviews/${review.id}`)}
-            className="flex items-center space-x-2 text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
-          >
-            <Eye className="w-4 h-4" />
-            <span>View Full Review</span>
-            <ArrowRight className="w-4 h-4" />
-          </Button>
-        </div>
+        {/* Minimalistic Read More Button */}
+        {review.content.length > 200 && (
+          <div className="mb-4">
+            <button
+              onClick={() => router.push(`/reviews/${review.id}`)}
+              className="text-blue-500 hover:text-blue-700 text-sm font-normal underline decoration-1 underline-offset-2 hover:decoration-2 transition-all duration-200"
+            >
+              Read More
+            </button>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex items-center justify-between pt-6 border-t border-gray-100">

@@ -2,24 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { 
   Star, 
-  Building2, 
-  MapPin, 
-  Users, 
-  Calendar,
+  ArrowLeft,
   Heart,
   MessageSquare,
   Share2,
-  ArrowLeft,
-  User,
-  Briefcase,
-  Clock,
-  ThumbsUp,
-  ThumbsDown,
   AlertCircle
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -35,7 +23,6 @@ export default function SingleReviewPage() {
   const [review, setReview] = useState<ReviewWithCompany | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [showComments, setShowComments] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
@@ -115,7 +102,6 @@ export default function SingleReviewPage() {
       await likeReview(review.id, currentUserId || undefined)
       setSuccessMessage('Thank you for your feedback!')
       setShowSuccessModal(true)
-      // Refresh the review to get updated like count
       await fetchReview()
     } catch (error) {
       console.error('Error liking review:', error)
@@ -124,21 +110,19 @@ export default function SingleReviewPage() {
 
   const handleAddComment = async (reviewId: string, content: string, isAnonymous: boolean, parentCommentId?: string) => {
     if (!review) return
-
+    
     try {
-      // Call the addComment function with the parent comment ID if provided
       await addComment(
-        reviewId,
-        content,
-        isAnonymous,
+        reviewId, 
+        content, 
+        isAnonymous, 
         currentUserId || undefined,
         parentCommentId
       )
-
+      
       setSuccessMessage(parentCommentId ? 'Reply added successfully!' : 'Comment added successfully!')
       setShowSuccessModal(true)
-
-      // Refresh the review to get updated comments
+      
       await fetchReview()
     } catch (error) {
       console.error('Error adding comment:', error)
@@ -171,64 +155,30 @@ export default function SingleReviewPage() {
     })
   }
 
-  const getEmploymentTypeColor = (type: string | null) => {
-    if (!type) return 'bg-gray-100 text-gray-800'
-    switch (type.toLowerCase()) {
-      case 'full-time':
-        return 'bg-green-100 text-green-800'
-      case 'part-time':
-        return 'bg-blue-100 text-blue-800'
-      case 'contract':
-        return 'bg-purple-100 text-purple-800'
-      case 'internship':
-        return 'bg-orange-100 text-orange-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  const getWorkLocationColor = (location: string | null) => {
-    if (!location) return 'bg-gray-100 text-gray-800'
-    switch (location.toLowerCase()) {
-      case 'remote':
-        return 'bg-blue-100 text-blue-800'
-      case 'office':
-        return 'bg-gray-100 text-gray-800'
-      case 'hybrid':
-        return 'bg-purple-100 text-purple-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
   if (loading) {
     return (
-      <div className="flex-1 max-w-4xl mx-auto p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded mb-4"></div>
-          <div className="h-64 bg-gray-200 rounded mb-4"></div>
-          <div className="h-32 bg-gray-200 rounded"></div>
-        </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-pulse text-gray-500">Loading review...</div>
       </div>
     )
   }
 
   if (error || !review) {
     return (
-      <div className="flex-1 max-w-4xl mx-auto p-6">
-        <Card className="text-center py-12">
-          <CardContent>
-            <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Review Not Found</h2>
-            <p className="text-gray-600 mb-6">
-              {error || 'The review you\'re looking for doesn\'t exist or has been removed.'}
-            </p>
-            <Button onClick={() => router.push('/reviews')} className="bg-blue-600 hover:bg-blue-700">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Reviews
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Review Not Found</h2>
+          <p className="text-gray-600 mb-6">
+            {error || 'The review you\'re looking for doesn\'t exist or has been removed.'}
+          </p>
+          <button 
+            onClick={() => router.push('/reviews')} 
+            className="text-blue-500 hover:text-blue-700 underline"
+          >
+            Back to Reviews
+          </button>
+        </div>
       </div>
     )
   }
@@ -238,150 +188,72 @@ export default function SingleReviewPage() {
   const commentCount = review.comments?.length || 0
 
   return (
-    <div className="flex-1 max-w-4xl mx-auto p-6">
-      {/* Back Button */}
-      <Button 
-        variant="outline" 
-        onClick={() => router.back()}
-        className="mb-6 hover:bg-gray-50"
-      >
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Back
-      </Button>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto p-6">
+        {/* Simple Back Link */}
+        <button 
+          onClick={() => router.back()}
+          className="text-blue-500 hover:text-blue-700 text-sm mb-6 flex items-center"
+        >
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Back to reviews
+        </button>
 
-      {/* Main Review Card */}
-      <Card className="mb-6">
-        <CardHeader className="pb-4">
-          {/* Company Info */}
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Building2 className="w-8 h-8 text-blue-600" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{review.companies.name}</h1>
-                <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
-                  <span className="flex items-center">
-                    <MapPin className="w-4 h-4 mr-1" />
-                    {review.companies.location}
-                  </span>
-                  <span className="flex items-center">
-                    <Users className="w-4 h-4 mr-1" />
-                    {review.companies.size} employees
-                  </span>
-                  <span className="flex items-center">
-                    <Briefcase className="w-4 h-4 mr-1" />
-                    {review.companies.industry}
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Action Buttons */}
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLike}
-                className={`${isLiked ? 'bg-red-50 text-red-600 border-red-200' : ''}`}
-              >
-                <Heart className={`w-4 h-4 mr-1 ${isLiked ? 'fill-current' : ''}`} />
-                {likeCount}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowComments(!showComments)}
-              >
-                <MessageSquare className="w-4 h-4 mr-1" />
-                {commentCount}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleShare}
-              >
-                <Share2 className="w-4 h-4 mr-1" />
-                Share
-              </Button>
+        {/* Clean Review Content */}
+        <div className="bg-white rounded-lg shadow-sm border p-8 mb-6">
+          {/* Company Name */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{review.companies.name}</h1>
+            <div className="flex items-center space-x-4 text-sm text-gray-600">
+              <span>{review.companies.location}</span>
+              <span>•</span>
+              <span>{review.companies.industry}</span>
             </div>
           </div>
 
-          {/* Review Title and Rating */}
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">{review.title}</h2>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-1">
-                {renderStars(review.rating)}
-                <span className="text-lg font-semibold text-gray-900 ml-2">
-                  {review.rating}.0
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Badge className={getEmploymentTypeColor(review.employment_type)}>
-                  {review.employment_type}
-                </Badge>
-                <Badge className={getWorkLocationColor(review.work_location)}>
-                  {review.work_location}
-                </Badge>
-                {review.is_current_employee ? (
-                  <Badge className="bg-green-100 text-green-800">Current Employee</Badge>
-                ) : (
-                  <Badge className="bg-gray-100 text-gray-800">Former Employee</Badge>
-                )}
-              </div>
-            </div>
+          {/* Review Title */}
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">{review.title}</h2>
+
+          {/* Rating */}
+          <div className="flex items-center mb-6">
+            {renderStars(review.rating)}
+            <span className="text-lg font-medium text-gray-900 ml-2">{review.rating}.0</span>
           </div>
-          {/* Author and Date Info */}
-          <div className="flex items-center justify-between text-sm text-gray-600 border-t pt-4">
-            <div className="flex items-center space-x-4">
-              <span className="flex items-center">
-                <User className="w-4 h-4 mr-1" />
-                {review.is_anonymous ? 'Anonymous' : 'Verified Employee'}
-              </span>
-              {review.position && (
-                <span className="flex items-center">
-                  <Briefcase className="w-4 h-4 mr-1" />
-                  {review.position}
-                </span>
-              )}
-              {review.department && (
-                <span>• {review.department}</span>
-              )}
-            </div>
-            <span className="flex items-center">
-              <Clock className="w-4 h-4 mr-1" />
-              {formatDate(review.created_at)}
+
+          {/* Employment Info */}
+          <div className="flex items-center space-x-3 mb-6">
+            <span className="px-3 py-1 bg-blue-50 text-blue-700 text-sm rounded-full">
+              {review.employment_type || 'Not specified'}
+            </span>
+            <span className="px-3 py-1 bg-gray-50 text-gray-700 text-sm rounded-full">
+              {review.work_location || 'Not specified'}
+            </span>
+            <span className="px-3 py-1 bg-green-50 text-green-700 text-sm rounded-full">
+              {review.is_current_employee ? 'Current Employee' : 'Former Employee'}
             </span>
           </div>
-        </CardHeader>
 
-        <CardContent>
-          {/* Main Review Content */}
-          <div className="prose max-w-none mb-6">
-            <p className="text-gray-700 leading-relaxed">{review.content}</p>
+          {/* Review Content */}
+          <div className="prose max-w-none mb-8">
+            <p className="text-gray-700 leading-relaxed text-base whitespace-pre-wrap">
+              {review.content}
+            </p>
           </div>
 
           {/* Pros and Cons */}
           {(review.pros || review.cons) && (
-            <div className="grid md:grid-cols-2 gap-6 mb-6">
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
               {review.pros && (
                 <div className="bg-green-50 rounded-lg p-4">
-                  <h3 className="flex items-center font-semibold text-green-800 mb-2">
-                    <ThumbsUp className="w-4 h-4 mr-2" />
-                    Pros
-                  </h3>
-                  <p className="text-green-700">{review.pros}</p>
+                  <h3 className="font-semibold text-green-800 mb-2">Pros</h3>
+                  <p className="text-green-700 text-sm">{review.pros}</p>
                 </div>
               )}
-
+              
               {review.cons && (
                 <div className="bg-red-50 rounded-lg p-4">
-                  <h3 className="flex items-center font-semibold text-red-800 mb-2">
-                    <ThumbsDown className="w-4 h-4 mr-2" />
-                    Cons
-                  </h3>
-                  <p className="text-red-700">{review.cons}</p>
+                  <h3 className="font-semibold text-red-800 mb-2">Cons</h3>
+                  <p className="text-red-700 text-sm">{review.cons}</p>
                 </div>
               )}
             </div>
@@ -389,42 +261,69 @@ export default function SingleReviewPage() {
 
           {/* Advice to Management */}
           {review.advice_to_management && (
-            <div className="bg-blue-50 rounded-lg p-4">
-              <h3 className="flex items-center font-semibold text-blue-800 mb-2">
-                <AlertCircle className="w-4 h-4 mr-2" />
-                Advice to Management
-              </h3>
-              <p className="text-blue-700">{review.advice_to_management}</p>
+            <div className="bg-blue-50 rounded-lg p-4 mb-8">
+              <h3 className="font-semibold text-blue-800 mb-2">Advice to Management</h3>
+              <p className="text-blue-700 text-sm">{review.advice_to_management}</p>
             </div>
           )}
-        </CardContent>
-      </Card>
 
-      {/* Comments Section */}
-      {showComments && (
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold">Comments ({commentCount})</h3>
-          </CardHeader>
-          <CardContent>
-            <CommentSection
-              reviewId={review.id}
-              comments={review.comments || []}
-              onAddComment={handleAddComment}
-            />
-          </CardContent>
-        </Card>
-      )}
+          {/* Action Buttons */}
+          <div className="flex items-center space-x-4 pt-6 border-t">
+            <button
+              onClick={handleLike}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm transition-colors ${
+                isLiked 
+                  ? 'bg-red-50 text-red-600 border border-red-200' 
+                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
+              <span>{likeCount} {likeCount === 1 ? 'Like' : 'Likes'}</span>
+            </button>
+            
+            <button
+              onClick={handleShare}
+              className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors"
+            >
+              <Share2 className="w-4 h-4" />
+              <span>Share</span>
+            </button>
+          </div>
 
-      {/* Success Modal */}
-      <SuccessModal
-        isOpen={showSuccessModal}
-        onClose={() => setShowSuccessModal(false)}
-        title="Success! 🎉"
-        message={successMessage}
-        actionText="Continue"
-        onAction={() => setShowSuccessModal(false)}
-      />
+          {/* Author Info */}
+          <div className="flex items-center justify-between text-sm text-gray-500 mt-6 pt-4 border-t">
+            <span>
+              {review.is_anonymous ? 'Anonymous' : 'Verified Employee'}
+              {review.position && ` • ${review.position}`}
+              {review.department && ` • ${review.department}`}
+            </span>
+            <span>{formatDate(review.created_at)}</span>
+          </div>
+        </div>
+
+        {/* Comments Section */}
+        <div className="bg-white rounded-lg shadow-sm border p-8">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">
+            Comments ({commentCount})
+          </h3>
+          
+          <CommentSection
+            reviewId={review.id}
+            comments={review.comments || []}
+            onAddComment={handleAddComment}
+          />
+        </div>
+
+        {/* Success Modal */}
+        <SuccessModal
+          isOpen={showSuccessModal}
+          onClose={() => setShowSuccessModal(false)}
+          title="Success! 🎉"
+          message={successMessage}
+          actionText="Continue"
+          onAction={() => setShowSuccessModal(false)}
+        />
+      </div>
     </div>
   )
 }
