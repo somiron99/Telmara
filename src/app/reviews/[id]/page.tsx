@@ -122,11 +122,11 @@ export default function SingleReviewPage() {
     }
   }
 
-  const handleAddComment = async (content: string, isAnonymous: boolean) => {
+  const handleAddComment = async (reviewId: string, content: string, isAnonymous: boolean) => {
     if (!review) return
-    
+
     try {
-      await addComment(review.id, content, isAnonymous, currentUserId || undefined)
+      await addComment(reviewId, content, isAnonymous, currentUserId || undefined)
       setSuccessMessage('Comment added successfully!')
       setShowSuccessModal(true)
       // Refresh the review to get updated comments
@@ -162,7 +162,8 @@ export default function SingleReviewPage() {
     })
   }
 
-  const getEmploymentTypeColor = (type: string) => {
+  const getEmploymentTypeColor = (type: string | null) => {
+    if (!type) return 'bg-gray-100 text-gray-800'
     switch (type.toLowerCase()) {
       case 'full-time':
         return 'bg-green-100 text-green-800'
@@ -177,7 +178,8 @@ export default function SingleReviewPage() {
     }
   }
 
-  const getWorkLocationColor = (location: string) => {
+  const getWorkLocationColor = (location: string | null) => {
+    if (!location) return 'bg-gray-100 text-gray-800'
     switch (location.toLowerCase()) {
       case 'remote':
         return 'bg-blue-100 text-blue-800'
@@ -400,7 +402,6 @@ export default function SingleReviewPage() {
               reviewId={review.id}
               comments={review.comments || []}
               onAddComment={handleAddComment}
-              currentUserId={currentUserId}
             />
           </CardContent>
         </Card>
