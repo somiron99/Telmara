@@ -13,7 +13,6 @@ import SampleDataCreator from '@/components/admin/sample-data-creator'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 
 import { Input } from '@/components/ui/input'
 import { useReviewActions } from '@/hooks/useReviewActions'
@@ -21,9 +20,7 @@ import Notification from '@/components/ui/notification'
 import { Pagination } from '@/components/ui/pagination'
 import { useReviews } from '@/contexts/ReviewContext'
 import {
-  Search,
-  MessageSquare,
-  Plus
+  Search
 } from 'lucide-react'
 
 // Lazy load the ReviewCard component for better performance
@@ -35,7 +32,6 @@ const ReviewCard = dynamic(() => import('@/components/review/review-card'), {
 
 export default function Home() {
   const [sortBy, setSortBy] = useState('newest')
-  const [filterBy, setFilterBy] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [notification, setNotification] = useState<string | null>(null)
   const [previousReviewCount, setPreviousReviewCount] = useState(0)
@@ -55,37 +51,9 @@ export default function Home() {
     return () => clearTimeout(timer)
   }, [])
 
-  // Get statistics
-  const stats = React.useMemo(() => {
-    const totalReviews = reviews.length
-    const totalCompanies = new Set(reviews.map(r => r.company_id)).size
-    const avgRating = totalReviews > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) : 0
-    const recentReviews = reviews.filter(r => {
-      const weekAgo = new Date()
-      weekAgo.setDate(weekAgo.getDate() - 7)
-      return new Date(r.created_at) >= weekAgo
-    }).length
 
-    return { totalReviews, totalCompanies, avgRating, recentReviews }
-  }, [reviews])
 
-  // Get trending companies (most reviewed this week)
-  const trendingCompanies = React.useMemo(() => {
-    const weekAgo = new Date()
-    weekAgo.setDate(weekAgo.getDate() - 7)
 
-    const recentReviews = reviews.filter(r => new Date(r.created_at) >= weekAgo)
-    const companyCount = recentReviews.reduce((acc, review) => {
-      const companyName = review.companies.name
-      acc[companyName] = (acc[companyName] || 0) + 1
-      return acc
-    }, {} as Record<string, number>)
-
-    return Object.entries(companyCount)
-      .sort(([,a], [,b]) => b - a)
-      .slice(0, 5)
-      .map(([name, count]) => ({ name, count }))
-  }, [reviews])
 
   // Filter and sort reviews
   const filteredAndSortedReviews = React.useMemo(() => {

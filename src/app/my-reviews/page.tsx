@@ -1,17 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Star, 
-  Building2, 
-  Calendar, 
-  Edit3, 
-  Trash2, 
+import {
+  Star,
+  Building2,
+  Calendar,
+  Trash2,
   Eye,
   MessageSquare,
   Heart,
@@ -31,11 +30,7 @@ export default function MyReviewsPage() {
   const router = useRouter()
   const supabase = createClient()
 
-  useEffect(() => {
-    fetchMyReviews()
-  }, [])
-
-  const fetchMyReviews = async () => {
+  const fetchMyReviews = useCallback(async () => {
     try {
       setLoading(true)
       
@@ -93,7 +88,11 @@ export default function MyReviewsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [router, supabase])
+
+  useEffect(() => {
+    fetchMyReviews()
+  }, [fetchMyReviews])
 
   const handleDeleteReview = async (reviewId: string) => {
     if (!confirm('Are you sure you want to delete this review? This action cannot be undone.')) {
