@@ -122,13 +122,22 @@ export default function SingleReviewPage() {
     }
   }
 
-  const handleAddComment = async (reviewId: string, content: string, isAnonymous: boolean) => {
+  const handleAddComment = async (reviewId: string, content: string, isAnonymous: boolean, parentCommentId?: string) => {
     if (!review) return
 
     try {
-      await addComment(reviewId, content, isAnonymous, currentUserId || undefined)
-      setSuccessMessage('Comment added successfully!')
+      // Call the addComment function with the parent comment ID if provided
+      await addComment(
+        reviewId,
+        content,
+        isAnonymous,
+        currentUserId || undefined,
+        parentCommentId
+      )
+
+      setSuccessMessage(parentCommentId ? 'Reply added successfully!' : 'Comment added successfully!')
       setShowSuccessModal(true)
+
       // Refresh the review to get updated comments
       await fetchReview()
     } catch (error) {

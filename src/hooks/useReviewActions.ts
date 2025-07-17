@@ -16,7 +16,7 @@ export function useReviewActions() {
     await originalLikeReview(reviewId, userId)
   }
 
-  const addComment = async (reviewId: string, content: string, isAnonymous: boolean, userId?: string) => {
+  const addComment = async (reviewId: string, content: string, isAnonymous: boolean, userId?: string, parentCommentId?: string) => {
     // Find the review being commented on
     const review = reviews.find(r => r.id === reviewId)
     if (!review) return
@@ -24,8 +24,8 @@ export function useReviewActions() {
     // Skip notifications for now since we don't have proper user management
     // TODO: Implement proper notification system with real user IDs
 
-    // Call the original add comment function
-    await originalAddComment(reviewId, content, isAnonymous, userId)
+    // Call the original add comment function with parent comment ID
+    await originalAddComment(reviewId, content, isAnonymous, userId, parentCommentId)
   }
 
   // Helper function to get user display name

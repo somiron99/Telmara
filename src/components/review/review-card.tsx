@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Heart, MessageCircle, Share2, Star } from 'lucide-react'
+import { Heart, MessageCircle, Share2, Star, Eye, ArrowRight } from 'lucide-react'
 import { formatRelativeTime } from '@/lib/utils'
 import { ReviewWithCompany, CommentWithAuthor } from '@/lib/types'
 import CommentSection from './comment-section'
@@ -23,6 +24,7 @@ export default function ReviewCard({ review, onLike, onComment, onShare, onAddCo
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const { openShareModal } = useShareModal()
   const supabase = createClient()
+  const router = useRouter()
 
   useEffect(() => {
     // Get current user ID
@@ -127,8 +129,26 @@ export default function ReviewCard({ review, onLike, onComment, onShare, onAddCo
         </div>
 
         {/* Content */}
-        <div className="mb-8">
-          <p className="text-gray-700 leading-relaxed text-base">{review.content}</p>
+        <div className="mb-6">
+          <p className="text-gray-700 leading-relaxed text-base">
+            {review.content.length > 200
+              ? `${review.content.substring(0, 200)}...`
+              : review.content
+            }
+          </p>
+        </div>
+
+        {/* View Full Review Button */}
+        <div className="mb-6">
+          <Button
+            variant="outline"
+            onClick={() => router.push(`/reviews/${review.id}`)}
+            className="flex items-center space-x-2 text-blue-600 border-blue-200 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200"
+          >
+            <Eye className="w-4 h-4" />
+            <span>View Full Review</span>
+            <ArrowRight className="w-4 h-4" />
+          </Button>
         </div>
 
         {/* Actions */}

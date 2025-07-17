@@ -16,7 +16,7 @@ interface ReviewContextType {
   addReview: (review: Omit<ReviewWithCompany, 'id' | 'created_at' | 'updated_at'>) => Promise<void>
   updateReview: (reviewId: string, updates: Partial<ReviewWithCompany>) => Promise<void>
   likeReview: (reviewId: string, userId?: string) => Promise<void>
-  addComment: (reviewId: string, content: string, isAnonymous: boolean, userId?: string) => Promise<void>
+  addComment: (reviewId: string, content: string, isAnonymous: boolean, userId?: string, parentCommentId?: string) => Promise<void>
   deleteReview: (reviewId: string) => Promise<void>
   fetchReviews: (page?: number, limit?: number) => Promise<void>
   setPage: (page: number) => void
@@ -349,7 +349,7 @@ export function ReviewProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const addComment = async (reviewId: string, content: string, isAnonymous: boolean, userId?: string) => {
+  const addComment = async (reviewId: string, content: string, isAnonymous: boolean, userId?: string, parentCommentId?: string) => {
     try {
       console.log('🔄 Adding comment:', { reviewId, content, isAnonymous, userId })
 
@@ -397,7 +397,8 @@ export function ReviewProvider({ children }: { children: ReactNode }) {
           review_id: reviewId,
           author_id: isAnonymous ? null : actualUserId,
           content,
-          is_anonymous: isAnonymous
+          is_anonymous: isAnonymous,
+          parent_comment_id: parentCommentId || null
         }])
         .select()
         .single()
