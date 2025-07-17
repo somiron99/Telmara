@@ -8,6 +8,9 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
 
+  // Disable SWC minification to avoid self reference issues
+  swcMinify: false,
+
   // Enable experimental features for better performance
   experimental: {
     optimizePackageImports: ['lucide-react'],
@@ -80,40 +83,15 @@ const nextConfig = {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
   
-  // Webpack configuration for better bundling
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Fix for 'self is not defined' error
+  // Simplified webpack configuration
+  webpack: (config, { isServer }) => {
+    // Only add fallbacks for client-side
     if (!isServer) {
       config.resolve.fallback = {
-        ...config.resolve.fallback,
         fs: false,
         net: false,
         tls: false,
-        crypto: false,
-        stream: false,
-        util: false,
-        buffer: false,
-        assert: false,
       }
-    }
-
-    // Add global polyfills
-    config.plugins.push(
-      new webpack.DefinePlugin({
-        'global.self': 'globalThis',
-      })
-    )
-
-    // Optimize bundle size
-    config.optimization.splitChunks = {
-      chunks: 'all',
-      cacheGroups: {
-        vendor: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          chunks: 'all',
-        },
-      },
     }
 
     return config

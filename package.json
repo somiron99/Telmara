@@ -21,10 +21,10 @@
   "scripts": {
     "dev": "next dev --port 3001",
     "dev:turbo": "next dev --turbopack --port 3001",
-    "build": "node vercel-build.js",
+    "build": "next build",
     "build:local": "next build",
     "build:ignore-errors": "DISABLE_ESLINT_PLUGIN=true SKIP_TYPE_CHECK=true next build",
-    "build:vercel": "node vercel-build.js",
+    "build:vercel": "next build",
     "start": "next start --port 3001",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
