@@ -32,6 +32,7 @@ const ReviewCard = dynamic(() => import('@/components/review/review-card'), {
 
 export default function Home() {
   const [sortBy, setSortBy] = useState('newest')
+  const [filterBy, setFilterBy] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [notification, setNotification] = useState<string | null>(null)
   const [previousReviewCount, setPreviousReviewCount] = useState(0)

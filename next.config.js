@@ -82,6 +82,16 @@ const nextConfig = {
   
   // Webpack configuration for better bundling
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Fix for 'self is not defined' error
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      }
+    }
+
     // Optimize bundle size
     config.optimization.splitChunks = {
       chunks: 'all',
@@ -93,7 +103,7 @@ const nextConfig = {
         },
       },
     }
-    
+
     return config
   },
   
