@@ -240,32 +240,7 @@ export default function SingleReviewPage() {
             </p>
           </div>
 
-          {/* Pros and Cons */}
-          {(review.pros || review.cons) && (
-            <div className="grid md:grid-cols-2 gap-6 mb-8">
-              {review.pros && (
-                <div className="bg-green-50 rounded-lg p-4">
-                  <h3 className="font-semibold text-green-800 mb-2">Pros</h3>
-                  <p className="text-green-700 text-sm">{review.pros}</p>
-                </div>
-              )}
-              
-              {review.cons && (
-                <div className="bg-red-50 rounded-lg p-4">
-                  <h3 className="font-semibold text-red-800 mb-2">Cons</h3>
-                  <p className="text-red-700 text-sm">{review.cons}</p>
-                </div>
-              )}
-            </div>
-          )}
 
-          {/* Advice to Management */}
-          {review.advice_to_management && (
-            <div className="bg-blue-50 rounded-lg p-4 mb-8">
-              <h3 className="font-semibold text-blue-800 mb-2">Advice to Management</h3>
-              <p className="text-blue-700 text-sm">{review.advice_to_management}</p>
-            </div>
-          )}
 
           {/* Action Buttons */}
           <div className="flex items-center space-x-4 pt-6 border-t">

@@ -131,22 +131,30 @@ export default function ReviewCard({ review, onLike, onComment, onShare, onAddCo
         {/* Content */}
         <div className="mb-6">
           <p className="text-gray-700 leading-relaxed text-base">
-            {review.content.length > 200
+            {review.content && review.content.length > 200
               ? `${review.content.substring(0, 200)}...`
-              : review.content
+              : review.content || 'No content available'
             }
           </p>
         </div>
 
-        {/* Minimalistic Read More Button */}
-        {review.content.length > 200 && (
+        {/* Minimalistic Read More Button - Always show for testing */}
+        {review.content && review.content.length > 200 && (
           <div className="mb-4">
             <button
               onClick={() => router.push(`/reviews/${review.id}`)}
-              className="text-blue-500 hover:text-blue-700 text-sm font-normal underline decoration-1 underline-offset-2 hover:decoration-2 transition-all duration-200"
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium underline decoration-2 underline-offset-2 hover:decoration-blue-600 transition-all duration-200"
             >
               Read More
             </button>
+          </div>
+        )}
+
+        {/* Debug info - remove after testing */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="text-xs text-gray-400 mb-2">
+            Content length: {review.content?.length || 0} characters
+            {review.content && review.content.length > 200 && ' - Read More should show'}
           </div>
         )}
 

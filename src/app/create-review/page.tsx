@@ -24,10 +24,7 @@ export default function CreateReviewPage() {
     employmentType: 'Full-time',
     workLocation: 'Office',
     isAnonymous: false,
-    isCurrentEmployee: true,
-    pros: '',
-    cons: '',
-    adviceToManagement: ''
+    isCurrentEmployee: true
   })
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -109,9 +106,9 @@ export default function CreateReviewPage() {
         work_location: formData.workLocation,
         is_anonymous: isAnonymous,
         is_current_employee: formData.isCurrentEmployee,
-        pros: formData.pros.trim() || null,
-        cons: formData.cons.trim() || null,
-        advice_to_management: formData.adviceToManagement.trim() || null,
+        pros: null,
+        cons: null,
+        advice_to_management: null,
         companies: company,
         reactions: [],
         comments: []
@@ -330,50 +327,7 @@ export default function CreateReviewPage() {
               />
             </div>
 
-            {/* Pros */}
-            <div className="space-y-2">
-              <label htmlFor="pros" className="text-sm font-medium text-gray-700">
-                Pros
-              </label>
-              <Textarea
-                id="pros"
-                placeholder="What are the best things about working here?"
-                value={formData.pros}
-                onChange={(e) => handleInputChange('pros', e.target.value)}
-                disabled={isLoading}
-                rows={3}
-              />
-            </div>
 
-            {/* Cons */}
-            <div className="space-y-2">
-              <label htmlFor="cons" className="text-sm font-medium text-gray-700">
-                Cons
-              </label>
-              <Textarea
-                id="cons"
-                placeholder="What could be improved?"
-                value={formData.cons}
-                onChange={(e) => handleInputChange('cons', e.target.value)}
-                disabled={isLoading}
-                rows={3}
-              />
-            </div>
-
-            {/* Advice to Management */}
-            <div className="space-y-2">
-              <label htmlFor="adviceToManagement" className="text-sm font-medium text-gray-700">
-                Advice to Management
-              </label>
-              <Textarea
-                id="adviceToManagement"
-                placeholder="What advice would you give to management?"
-                value={formData.adviceToManagement}
-                onChange={(e) => handleInputChange('adviceToManagement', e.target.value)}
-                disabled={isLoading}
-                rows={3}
-              />
-            </div>
 
             {/* Options */}
             <div className="space-y-4">
