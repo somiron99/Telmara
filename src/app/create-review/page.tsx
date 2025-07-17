@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,8 +32,27 @@ export default function CreateReviewPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [userLoading, setUserLoading] = useState(true)
   const router = useRouter()
   const { addReview } = useReviewActions()
+
+  // Check user authentication status
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        setCurrentUser(user)
+      } catch (error) {
+        console.error('Error checking user:', error)
+        setCurrentUser(null)
+      } finally {
+        setUserLoading(false)
+      }
+    }
+
+    checkUser()
+  }, [])
 
   const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -69,14 +88,18 @@ export default function CreateReviewPage() {
 
       // Get current user for author_id
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user && !formData.isAnonymous) {
+
+      // If user is not signed in, automatically make the review anonymous
+      const isAnonymous = formData.isAnonymous || !user
+
+      if (!user && !isAnonymous) {
         throw new Error('You must be signed in to create a non-anonymous review')
       }
 
       // Create the review object with correct column names matching the type definition
       const newReview = {
         company_id: company.id,
-        author_id: formData.isAnonymous ? null : (user?.id || null),
+        author_id: isAnonymous ? null : (user?.id || null),
         title: formData.title.trim(),
         content: formData.content.trim(),
         rating: formData.rating,
@@ -84,7 +107,7 @@ export default function CreateReviewPage() {
         department: formData.department.trim() || null,
         employment_type: formData.employmentType,
         work_location: formData.workLocation,
-        is_anonymous: formData.isAnonymous,
+        is_anonymous: isAnonymous,
         is_current_employee: formData.isCurrentEmployee,
         pros: formData.pros.trim() || null,
         cons: formData.cons.trim() || null,
@@ -141,6 +164,27 @@ export default function CreateReviewPage() {
         <p className="text-gray-600">
           Share your workplace experience to help others make informed decisions.
         </p>
+
+        {/* User Status Display */}
+        {!userLoading && (
+          <div className="mt-4 p-3 rounded-lg bg-blue-50 border border-blue-200">
+            {currentUser ? (
+              <p className="text-sm text-blue-800">
+                ✅ <strong>Signed in as:</strong> {currentUser.email}
+                <span className="ml-2 text-blue-600">You can post as yourself or anonymously</span>
+              </p>
+            ) : (
+              <p className="text-sm text-blue-800">
+                ℹ️ <strong>Not signed in:</strong> Your review will be posted anonymously
+                <span className="ml-2">
+                  <a href="/auth/login" className="text-blue-600 hover:text-blue-800 underline">
+                    Sign in
+                  </a> to post with your name
+                </span>
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       <Card>
