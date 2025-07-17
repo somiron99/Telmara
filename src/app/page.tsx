@@ -1,103 +1,327 @@
-import Image from "next/image";
+'use client'
+
+import React, { Suspense, useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
+import Link from 'next/link'
+import Sidebar from '@/components/layout/sidebar'
+import ReviewSkeleton from '@/components/review/review-skeleton'
+import SampleDataCreator from '@/components/admin/sample-data-creator'
+
+
+
+
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+
+import { Input } from '@/components/ui/input'
+import { useReviewActions } from '@/hooks/useReviewActions'
+import Notification from '@/components/ui/notification'
+import { Pagination } from '@/components/ui/pagination'
+import { useReviews } from '@/contexts/ReviewContext'
+import {
+  Search,
+  MessageSquare,
+  Plus
+} from 'lucide-react'
+
+// Lazy load the ReviewCard component for better performance
+const ReviewCard = dynamic(() => import('@/components/review/review-card'), {
+  loading: () => <ReviewSkeleton />
+})
+
+
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [sortBy, setSortBy] = useState('newest')
+  const [filterBy, setFilterBy] = useState('all')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [notification, setNotification] = useState<string | null>(null)
+  const [previousReviewCount, setPreviousReviewCount] = useState(0)
+  const { reviews, likeReview, addComment } = useReviewActions()
+  const {
+    totalReviews,
+    currentPage,
+    totalPages,
+    itemsPerPage,
+    setPage
+  } = useReviews()
+  const [loading, setLoading] = useState(true)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    // Simulate loading state
+    const timer = setTimeout(() => setLoading(false), 1000)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Get statistics
+  const stats = React.useMemo(() => {
+    const totalReviews = reviews.length
+    const totalCompanies = new Set(reviews.map(r => r.company_id)).size
+    const avgRating = totalReviews > 0 ? (reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) : 0
+    const recentReviews = reviews.filter(r => {
+      const weekAgo = new Date()
+      weekAgo.setDate(weekAgo.getDate() - 7)
+      return new Date(r.created_at) >= weekAgo
+    }).length
+
+    return { totalReviews, totalCompanies, avgRating, recentReviews }
+  }, [reviews])
+
+  // Get trending companies (most reviewed this week)
+  const trendingCompanies = React.useMemo(() => {
+    const weekAgo = new Date()
+    weekAgo.setDate(weekAgo.getDate() - 7)
+
+    const recentReviews = reviews.filter(r => new Date(r.created_at) >= weekAgo)
+    const companyCount = recentReviews.reduce((acc, review) => {
+      const companyName = review.companies.name
+      acc[companyName] = (acc[companyName] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+
+    return Object.entries(companyCount)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([name, count]) => ({ name, count }))
+  }, [reviews])
+
+  // Filter and sort reviews
+  const filteredAndSortedReviews = React.useMemo(() => {
+    let filtered = [...reviews]
+
+    // Apply search filter
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(review =>
+        review.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        review.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        review.companies.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        review.position?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }
+
+    // Apply filters
+    switch (filterBy) {
+      case 'current':
+        filtered = filtered.filter(review => review.is_current_employee)
+        break
+      case 'former':
+        filtered = filtered.filter(review => !review.is_current_employee)
+        break
+      case 'high-rated':
+        filtered = filtered.filter(review => review.rating >= 4)
+        break
+      case 'recent':
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+        filtered = filtered.filter(review => new Date(review.created_at) > thirtyDaysAgo)
+        break
+      default:
+        // 'all' - no filtering
+        break
+    }
+
+    // Apply sorting
+    switch (sortBy) {
+      case 'oldest':
+        filtered.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+        break
+      case 'highest-rated':
+        filtered.sort((a, b) => b.rating - a.rating)
+        break
+      case 'lowest-rated':
+        filtered.sort((a, b) => a.rating - b.rating)
+        break
+      case 'most-helpful':
+        filtered.sort((a, b) => (b.reactions?.length || 0) - (a.reactions?.length || 0))
+        break
+      case 'newest':
+      default:
+        filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        break
+    }
+
+    return filtered
+  }, [reviews, filterBy, sortBy, searchTerm])
+
+  // Show notification when new reviews are added
+  useEffect(() => {
+    if (previousReviewCount > 0 && reviews.length > previousReviewCount) {
+      const newReviewsCount = reviews.length - previousReviewCount
+      setNotification(`${newReviewsCount} new review${newReviewsCount > 1 ? 's' : ''} added!`)
+    }
+    setPreviousReviewCount(reviews.length)
+  }, [reviews.length, previousReviewCount])
+
+  const handleLike = async (reviewId: string) => {
+    await likeReview(reviewId)
+  }
+
+  const handleComment = (reviewId: string) => {
+    console.log('Toggle comments for review:', reviewId)
+  }
+
+  const handleShare = (reviewId: string) => {
+    console.log('Share review:', reviewId)
+  }
+
+  const handleAddComment = async (reviewId: string, content: string, isAnonymous: boolean) => {
+    await addComment(reviewId, content, isAnonymous)
+  }
+
+  if (loading) {
+    return (
+      <>
+        <Sidebar className="hidden lg:block fixed left-0 top-16 h-[calc(100vh-4rem)] z-40" />
+        <div className="flex-1 lg:ml-72">
+          <div className="text-center py-16 px-6">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-3"></div>
+            <p className="text-gray-600">Loading reviews...</p>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+      </>
+    )
+  }
+
+  return (
+    <>
+      {notification && (
+        <Notification
+          message={notification}
+          type="success"
+          onClose={() => setNotification(null)}
+        />
+      )}
+      <Sidebar className="hidden lg:block fixed left-0 top-16 h-[calc(100vh-4rem)] z-40" />
+      <div className="flex-1 lg:ml-72">
+        <div className="w-full px-8 py-6">
+          {/* Minimal Hero Section */}
+          <div className="mb-8">
+            <div className="text-center mb-6">
+              <h1 className="text-3xl font-bold text-gray-900 mb-3">
+                Workplace Reviews
+              </h1>
+              <p className="text-gray-600 max-w-2xl mx-auto mb-6">
+                Read authentic employee experiences and share your workplace insights.
+              </p>
+              <div className="flex items-center justify-center space-x-3">
+                <Link href="/create-review">
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2">
+                    Write Review
+                  </Button>
+                </Link>
+                <Link href="/companies">
+                  <Button variant="outline" className="px-6 py-2 border-gray-300">
+                    Browse Companies
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+          </div>
+
+
+
+          {/* Reviews Section */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">Latest Reviews</h2>
+              <Link href="/reviews">
+                <Button variant="outline" size="sm" className="text-sm">
+                  View All
+                </Button>
+              </Link>
+            </div>
+
+            <div className="flex gap-3 mb-4">
+              {/* Simple Search Bar */}
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Search reviews..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 text-sm"
+                />
+              </div>
+
+              {/* Simple Sort */}
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="oldest">Oldest</SelectItem>
+                  <SelectItem value="highest-rated">Top Rated</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+
+          </div>
+
+          {/* Reviews List */}
+          <Suspense fallback={<div className="space-y-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <ReviewSkeleton key={i} />
+            ))}
+          </div>}>
+            {filteredAndSortedReviews.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500 mb-4">No reviews found</p>
+
+                {/* Show sample data creator if no reviews at all */}
+                {reviews.length === 0 && !searchTerm && (
+                  <div className="mb-4">
+                    <SampleDataCreator />
+                  </div>
+                )}
+
+                <div className="flex items-center justify-center space-x-3">
+                  {searchTerm && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSearchTerm('')}
+                    >
+                      Clear Search
+                    </Button>
+                  )}
+                  <Link href="/create-review">
+                    <Button size="sm">
+                      Write Review
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredAndSortedReviews.map((review) => (
+                  <ReviewCard
+                    key={review.id}
+                    review={review}
+                    onLike={handleLike}
+                    onComment={handleComment}
+                    onShare={handleShare}
+                    onAddComment={handleAddComment}
+                  />
+                ))}
+
+                {/* Pagination */}
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                  totalItems={totalReviews}
+                  itemsPerPage={itemsPerPage}
+                />
+              </div>
+            )}
+          </Suspense>
+        </div>
+      </div>
+    </>
+  )
 }

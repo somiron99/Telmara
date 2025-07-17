@@ -1,27 +1,64 @@
 {
   "name": "workplace-reviews",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "A modern workplace review platform built with Next.js 15, TypeScript, and Supabase",
   "private": true,
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/workplace-reviews.git"
+  },
+  "keywords": [
+    "workplace",
+    "reviews",
+    "nextjs",
+    "typescript",
+    "supabase",
+    "tailwindcss",
+    "react"
+  ],
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --port 3001",
+    "dev:turbo": "next dev --turbopack --port 3001",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "start": "next start --port 3001",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit",
+    "test": "echo \"No tests specified\" && exit 0",
+    "clean": "rm -rf .next node_modules/.cache",
+    "analyze": "ANALYZE=true npm run build",
+    "postinstall": "npm run type-check"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.1.1",
+    "@radix-ui/react-select": "^2.2.5",
+    "@radix-ui/react-tabs": "^1.1.12",
+    "@supabase/auth-helpers-nextjs": "^0.10.0",
+    "@supabase/ssr": "^0.6.1",
+    "@supabase/supabase-js": "^2.51.0",
+    "@tailwindcss/line-clamp": "^0.4.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.525.0",
+    "next": "15.4.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.4.1"
+    "react-hook-form": "^7.60.0",
+    "tailwind-merge": "^3.3.1",
+    "zod": "^4.0.5"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.4.1",
-    "@eslint/eslintrc": "^3"
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }
