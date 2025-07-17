@@ -390,16 +390,22 @@ export function ReviewProvider({ children }: { children: ReactNode }) {
       const actualUserId = userId || user.id
       console.log('👤 Using user ID:', actualUserId)
 
-      // Insert comment
+      // Insert comment (with fallback for missing parent_comment_id column)
+      const commentData: any = {
+        review_id: reviewId,
+        author_id: isAnonymous ? null : actualUserId,
+        content,
+        is_anonymous: isAnonymous
+      }
+
+      // Only add parent_comment_id if it's provided and the column exists
+      if (parentCommentId) {
+        commentData.parent_comment_id = parentCommentId
+      }
+
       const { data, error } = await supabase
         .from('comments')
-        .insert([{
-          review_id: reviewId,
-          author_id: isAnonymous ? null : actualUserId,
-          content,
-          is_anonymous: isAnonymous,
-          parent_comment_id: parentCommentId || null
-        }])
+        .insert([commentData])
         .select()
         .single()
 
@@ -419,6 +425,10 @@ export function ReviewProvider({ children }: { children: ReactNode }) {
           throw new Error('Permission denied. Please check your authentication.')
         } else if (error.code === '42501') {
           throw new Error('Insufficient permissions. Please sign in and try again.')
+        } else if (error.message?.includes('parent_comment_id')) {
+          throw new Error('Database schema needs to be updated. Please contact support.')
+        } else if (error.message?.includes('column') && error.message?.includes('does not exist')) {
+          throw new Error('Database schema is outdated. Please refresh the page and try again.')
         } else {
           throw new Error(`Failed to add comment: ${error.message || error.code || 'Unknown error'}`)
         }
