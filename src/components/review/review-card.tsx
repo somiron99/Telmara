@@ -143,7 +143,7 @@ export default function ReviewCard({ review, onLike, onComment, onShare, onAddCo
           <div className="mb-4">
             <button
               onClick={() => router.push(`/reviews/${review.id}`)}
-              className="text-blue-600 hover:text-blue-800 text-sm font-medium underline decoration-2 underline-offset-2 hover:decoration-blue-600 transition-all duration-200"
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium underline decoration-2 underline-offset-2 hover:decoration-blue-600 transition-all duration-200 cursor-pointer"
             >
               Read More
             </button>
@@ -168,7 +168,7 @@ export default function ReviewCard({ review, onLike, onComment, onShare, onAddCo
               disabled={!currentUserId}
               className={`flex items-center space-x-1 text-sm ${
                 isLiked ? 'text-red-600' : 'text-gray-500 hover:text-red-600'
-              } ${!currentUserId ? 'opacity-50 cursor-not-allowed' : ''}`}
+              } ${!currentUserId ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
               title={!currentUserId ? 'Sign in to like reviews' : isLiked ? 'Unlike this review' : 'Like this review'}
             >
               <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
@@ -182,7 +182,7 @@ export default function ReviewCard({ review, onLike, onComment, onShare, onAddCo
                 setShowComments(!showComments)
                 onComment?.(review.id)
               }}
-              className="flex items-center space-x-1 text-sm text-gray-500 hover:text-blue-600"
+              className="flex items-center space-x-1 text-sm text-gray-500 hover:text-blue-600 cursor-pointer"
             >
               <MessageCircle className="w-4 h-4" />
               <span>Comments</span>
@@ -202,7 +202,7 @@ export default function ReviewCard({ review, onLike, onComment, onShare, onAddCo
                 })
                 onShare?.(review.id)
               }}
-              className="flex items-center space-x-1 text-sm text-gray-500 hover:text-blue-600"
+              className="flex items-center space-x-1 text-sm text-gray-500 hover:text-blue-600 cursor-pointer"
             >
               <Share2 className="w-4 h-4" />
               <span>Share</span>

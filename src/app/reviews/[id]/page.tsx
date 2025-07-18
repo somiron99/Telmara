@@ -188,19 +188,20 @@ export default function SingleReviewPage() {
   const commentCount = review.comments?.length || 0
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto p-6">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-start">
+      <div className="w-full max-w-4xl px-4 py-6">
         {/* Simple Back Link */}
-        <button 
+        <button
           onClick={() => router.back()}
-          className="text-blue-500 hover:text-blue-700 text-sm mb-6 flex items-center"
+          className="text-blue-500 hover:text-blue-700 text-sm mb-6 flex items-center cursor-pointer transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
           Back to reviews
         </button>
 
-        {/* Clean Review Content */}
-        <div className="bg-white rounded-lg shadow-sm border p-8 mb-6">
+        {/* Perfectly Centered Review Content */}
+        <div className="bg-white rounded-lg shadow-sm border mx-auto max-w-2xl">
+          <div className="p-8">
           {/* Company Name */}
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">{review.companies.name}</h1>
@@ -246,19 +247,19 @@ export default function SingleReviewPage() {
           <div className="flex items-center space-x-4 pt-6 border-t">
             <button
               onClick={handleLike}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm transition-colors ${
-                isLiked 
-                  ? 'bg-red-50 text-red-600 border border-red-200' 
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm transition-colors cursor-pointer ${
+                isLiked
+                  ? 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100'
                   : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
               }`}
             >
               <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
               <span>{likeCount} {likeCount === 1 ? 'Like' : 'Likes'}</span>
             </button>
-            
+
             <button
               onClick={handleShare}
-              className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors"
+              className="flex items-center space-x-2 px-4 py-2 rounded-lg text-sm bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
             >
               <Share2 className="w-4 h-4" />
               <span>Share</span>
@@ -274,10 +275,12 @@ export default function SingleReviewPage() {
             </span>
             <span>{formatDate(review.created_at)}</span>
           </div>
+          </div>
         </div>
 
         {/* Comments Section */}
-        <div className="bg-white rounded-lg shadow-sm border p-8">
+        <div className="bg-white rounded-lg shadow-sm border mx-auto max-w-2xl mt-6">
+          <div className="p-8">
           <h3 className="text-lg font-semibold text-gray-900 mb-6">
             Comments ({commentCount})
           </h3>
@@ -287,6 +290,7 @@ export default function SingleReviewPage() {
             comments={review.comments || []}
             onAddComment={handleAddComment}
           />
+          </div>
         </div>
 
         {/* Success Modal */}
